@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Схема QR-кодов плантаций</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .plantations {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .plantation {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .plantation-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .plantation-header h2 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+        
+        .plantation-info {
+            background-color: #ecf0f1;
+            padding: 10px 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .info-item {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+        
+        .rows {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            padding: 15px;
+        }
+        
+        .row-card {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            background-color: white;
+            position: relative;
+        }
+        
+        .row-card.unic::after {
+            content: "УНИКАЛЬНЫЙ СКАН";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #e74c3c;
+            color: white;
+            font-size: 0.7em;
+            padding: 3px 6px;
+            border-radius: 0 6px 0 6px;
+            font-weight: bold;
+        }
+        
+        .row-number {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        
+        .qr-codes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        
+        .qr-code {
+            background-color: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .search-item {
+            margin-top: 8px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-style: italic;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            margin-left: 5px;
+            background-color: #3498db;
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 14px;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: #34495e;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 0.9em;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Схема QR-кодов плантаций</h1>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="plantation-filter">Выберите плантацию:</label>
+                <select id="plantation-filter">
+                    <option value="all">Все плантации</option>
+                    <!-- будет заполнено скриптом -->
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="crop-filter">Выберите культуру:</label>
+                <select id="crop-filter">
+                    <option value="all">Все культуры</option>
+                    <!-- будет заполнено скриптом -->
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="year-filter">Выберите год:</label>
+                <select id="year-filter">
+                    <option value="all">Все годы</option>
+                    <!-- будет заполнено скриптом -->
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="search-filter">Тип сканирования:</label>
+                <select id="search-filter">
+                    <option value="all">Все типы</option>
+                    <option value="unic">Только уникальные</option>
+                    <option value="normal">Только стандартные</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="qr-search">Поиск по QR-коду:</label>
+                <input type="text" id="qr-search" placeholder="Введите номер QR-кода">
+            </div>
+        </div>
+        
+        <div class="plantations" id="plantations-container">
+            <!-- будет заполнено скриптом -->
+        </div>
+        
+        <div class="no-results" id="no-results" style="display: none;">
+            Нет данных, соответствующих выбранным фильтрам
+        </div>
+    </div>
+
+    <script>
+        // Загрузка данных из JSON
+        let plantationData = [];
+
+        fetch('https://raw.githubusercontent.com/nikiomori/temp/refs/heads/main/row.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                plantationData = data;
+                initializeFilters();
+                renderPlantations();
+            })
+            .catch(error => {
+                console.error('There has been a problem with your fetch operation:', error);
+                document.getElementById('plantations-container').innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: #e74c3c;">
+                        <h3>Ошибка загрузки данных</h3>
+                        <p>${error.message}</p>
+                    </div>`;
+            });
+
+        // Инициализация фильтров на основе данных
+        function initializeFilters() {
+            const plantationFilter = document.getElementById('plantation-filter');
+            const cropFilter = document.getElementById('crop-filter');
+            const yearFilter = document.getElementById('year-filter');
+            
+            const plantations = new Set();
+            const crops = new Set();
+            const years = new Set();
+            
+            plantationData.forEach(row => {
+                plantations.add(row.plantation);
+                crops.add(row.crop);
+                years.add(row.year);
+            });
+            
+            [...plantations].sort().forEach(plantation => {
+                const option = document.createElement('option');
+                option.value = plantation;
+                option.textContent = `Плантация ${plantation}`;
+                plantationFilter.appendChild(option);
+            });
+            
+            [...crops].sort().forEach(crop => {
+                const option = document.createElement('option');
+                option.value = crop;
+                option.textContent = crop;
+                cropFilter.appendChild(option);
+            });
+            
+            [...years].sort().forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearFilter.appendChild(option);
+            });
+        }
+        
+        // Отображение плантаций с учетом фильтров
+        function renderPlantations() {
+            const plantationsContainer = document.getElementById('plantations-container');
+            const noResults = document.getElementById('no-results');
+            plantationsContainer.innerHTML = '';
+            
+            const plantationFilter = document.getElementById('plantation-filter').value;
+            const cropFilter = document.getElementById('crop-filter').value;
+            const yearFilter = document.getElementById('year-filter').value;
+            const searchFilter = document.getElementById('search-filter').value;
+            const qrSearch = document.getElementById('qr-search').value.trim().toUpperCase();
+            
+            // Группируем данные по плантациям
+            const plantationGroups = {};
+            
+            plantationData.forEach(row => {
+                // Применяем фильтры
+                if (plantationFilter !== 'all' && row.plantation != plantationFilter) return;
+                if (cropFilter !== 'all' && row.crop !== cropFilter) return;
+                if (yearFilter !== 'all' && row.year != yearFilter) return;
+                if (searchFilter === 'unic' && row.search !== 'unic') return;
+                if (searchFilter === 'normal' && row.search === 'unic') return;
+                if (qrSearch && !row.qr_codes.includes(qrSearch)) return;
+                
+                if (!plantationGroups[row.plantation]) {
+                    plantationGroups[row.plantation] = {
+                        info: {
+                            crop: row.crop,
+                            year: row.year,
+                            area_plantation_discription: row.area_plantation_discription,
+                            area_plantation: row.area_plantation,
+                            row_distans: row.row_distans
+                        },
+                        rows: []
+                    };
+                }
+                
+                plantationGroups[row.plantation].rows.push(row);
+            });
+            
+            // Отображаем каждую плантацию
+            const plantationIds = Object.keys(plantationGroups).sort((a, b) => a - b);
+            
+            if (plantationIds.length === 0) {
+                noResults.style.display = 'block';
+                return;
+            } else {
+                noResults.style.display = 'none';
+            }
+            
+            plantationIds.forEach(plantationId => {
+                const plantationGroup = plantationGroups[plantationId];
+                const plantationElement = document.createElement('div');
+                plantationElement.className = 'plantation';
+                
+                plantationElement.innerHTML = `
+                    <div class="plantation-header">
+                        <h2>Плантация ${plantationId}</h2>
+                        <span>${plantationGroup.rows.length} рядов</span>
+                    </div>
+                    <div class="plantation-info">
+                        <div class="info-item">
+                            <div class="info-label">Культура</div>
+                            <div class="info-value">${plantationGroup.info.crop}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Год</div>
+                            <div class="info-value">${plantationGroup.info.year}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Расстояние между рядами</div>
+                            <div class="info-value">${plantationGroup.info.row_distans} м</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Размеры</div>
+                            <div class="info-value">${plantationGroup.info.area_plantation_discription} м</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Площадь</div>
+                            <div class="info-value">${plantationGroup.info.area_plantation} га</div>
+                        </div>
+                    </div>
+                    <div class="rows">
+                        ${plantationGroup.rows.sort((a, b) => a.num_row - b.num_row).map(row => `
+                            <div class="row-card ${row.search === 'unic' ? 'unic' : ''}">
+                                <div class="row-number">Ряд ${row.num_row}</div>
+                                <div>Длина ряда: ${row.row_lenght} м</div>
+                                <div class="qr-codes">
+                                    ${row.qr_codes.split(',').map(code => `
+                                        <span class="qr-code">${code.trim()}</span>
+                                    `).join('')}
+                                </div>
+                                <div class="search-item">
+                                    ${row.search === 'unic' ? 'Требуется уникальный скан' : 'Стандартный скан'}
+                                    <span class="tooltip">?
+                                        <span class="tooltip-text">
+                                            ${row.search === 'unic' 
+                                                ? 'Необходимо сканировать все QR-коды из списка' 
+                                                : 'Достаточно сканировать любой QR-код из списка'}
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                plantationsContainer.appendChild(plantationElement);
+            });
+        }
+        
+        // Обработчики изменения фильтров
+        document.getElementById('plantation-filter').addEventListener('change', renderPlantations);
+        document.getElementById('crop-filter').addEventListener('change', renderPlantations);
+        document.getElementById('year-filter').addEventListener('change', renderPlantations);
+        document.getElementById('search-filter').addEventListener('change', renderPlantations);
+        document.getElementById('qr-search').addEventListener('input', renderPlantations);
+    </script>
+</body>
+</html>
